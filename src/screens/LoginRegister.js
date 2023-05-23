@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import { StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert } from "react-native";
 import {
   signInWithEmailAndPassword,
@@ -10,25 +10,25 @@ import ToggleNavigation from "../components/ToggleNavigation";
 const iconCam = require("../../assets/icon-cam.png");
 import colors from '../../colors';
 
+const fnSigin = (email, password) => {
+  if (email !== "" && password !== "") {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => console.log("Login success"))
+      .catch((err) => Alert.alert("Login error", err.message));
+  }
+};
+
+const fnSignup = (email, password) => {
+  if (email !== '' && password !== '') {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(() => console.log('Signup success'))
+      .catch((err) => Alert.alert("Login error", err.message));
+  }
+};
+
 export default function LoginRegister() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const onHandleLogin = () => {
-    if (email !== "" && password !== "") {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success"))
-        .catch((err) => Alert.alert("Login error", err.message));
-    }
-  };
-
-  const onHandleSignup = () => {
-    if (email !== '' && password !== '') {
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => console.log('Signup success'))
-        .catch((err) => Alert.alert("Login error", err.message));
-    }
-  };
 
   const [isLoginActive, setIsLoginActive] = useState(true);
 
@@ -45,6 +45,7 @@ export default function LoginRegister() {
 
       <SafeAreaView style={styles.form}>
         <Image source={iconCam} style={styles.iconCam} />
+
         <TextInput
           style={styles.input}
           placeholderTextColor="rgba(238, 238, 238, 0.5)"
@@ -68,7 +69,10 @@ export default function LoginRegister() {
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
-        <TouchableOpacity style={styles.button} onPress={isLoginActive ? onHandleLogin : onHandleSignup}>
+
+        <TouchableOpacity style={styles.button} onPress={() => {
+          isLoginActive ? fnSigin(email, password) : fnSignup(email, password)
+        }}>
           <Text style={{ fontWeight: 'bold', color: '#000', fontSize: 18 }}>
             {isLoginActive ? "Login" : "Registrar"}
           </Text>

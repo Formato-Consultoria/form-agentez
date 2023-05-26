@@ -157,7 +157,7 @@ export default function FormModal({ handleClose }) {
                                     }
                                 ]}
                                 placeholderTextColor="rgba(238, 238, 238, 0.5)"
-                                placeholder="Nome do atendente"
+                                placeholder="Nome do(a) atendente"
                                 autoCapitalize="words"
                                 keyboardType="default"
                                 textContentType="name"
@@ -180,7 +180,7 @@ export default function FormModal({ handleClose }) {
                                     }
                                 ]}
                                 placeholderTextColor="rgba(238, 238, 238, 0.5)"
-                                placeholder="Cargo do atendente"
+                                placeholder="Cargo do(a) atendente"
                                 autoCapitalize="words"
                                 keyboardType="default"
                                 textContentType="name"

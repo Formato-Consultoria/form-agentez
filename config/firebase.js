@@ -12,8 +12,7 @@ const firebaseConfig = {
   projectId: Constants.manifest.extra.projectId,
   storageBucket: Constants.manifest.extra.storageBucket,
   messagingSenderId: Constants.manifest.extra.messagingSenderId,
-  appId: Constants.manifest.extra.appId,
-  databaseURL: Constants.manifest.extra.databaseURL
+  appId: Constants.manifest.extra.appId
 };
 
 // initialize firebase

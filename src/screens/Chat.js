@@ -79,7 +79,7 @@ export default function Chat() {
               textAlign: 'center',
               fontSize: 12,
               fontWeight: 'bold'
-            }}>Nenhuma mensagem ainda!</Text>}
+            }}>Carregando...</Text>}
         />
         :
         <Text

@@ -30,7 +30,7 @@ export default function ToggleNavigation({ isToggle, handleFn }) {
 
 const styles = StyleSheet.create({
     togglecontainer: {
-        marginVertical: 60,
+        marginVertical: 50,
         marginLeft: 20,
     },
     checkboxLabel: {

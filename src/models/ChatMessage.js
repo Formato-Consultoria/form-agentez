@@ -9,9 +9,8 @@ export class ChatMessageBox {
       companyName: ''
     },
     user = {
-      phoneNumber: '',
+      userEmail: '',
       userName: '',
-      userId: '',
     }
   ) {
     this.id = id;

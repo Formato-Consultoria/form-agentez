@@ -7,7 +7,7 @@ export default function ChatBox({ id, user, content, sent } = new ChatMessageBox
 
     return (
         <View style={styles.container}>
-            <Text style={styles.name}>{user?.userName ?? user?.phoneNumber}</Text>
+            <Text style={styles.name}>{user?.userName}</Text>
             <Image
                 source={{ uri: content?.imageSelf }}
                 style={styles.image}

@@ -1,4 +1,5 @@
 import { View, Text, Image, TextInput, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 
@@ -13,9 +14,13 @@ import colors from '../../colors';
 import { ChatMessageBox } from '../models/ChatMessage';
 import {
     saveMessageInRealtimeDatabase,
-    uploadImageCloudinary
+    uploadImageCloudinary,
+    getUserInfoFromRealtimeDatabase
 } from '../functions/chat-message.function';
 import { Alert } from 'react-native';
+
+import { auth } from "../../config/firebase";
+import { onAuthStateChanged } from 'firebase/auth';
 
 const schema = yup.object({
     imageSelf: yup.string().required("Precisamos de uma imagem!"),
@@ -25,6 +30,7 @@ const schema = yup.object({
 })
 
 export default function FormModal({ handleClose }) {
+    const [currentUser, setCurrentUser] = useState(null);
     const [hasGalleryPermission, setHasGalleryPermission] = useState(true);
     const [image, setImage] = useState(null);
 
@@ -32,12 +38,12 @@ export default function FormModal({ handleClose }) {
         resolver: yupResolver(schema)
     })
 
-    // useEffect(() => {
-    //     (async () => {
-    //         const galleryStatus = await ImagePicker.getMediaLibraryPermissionsAsync();
-    //         setHasGalleryPermission(galleryStatus.status === 'granted');
-    //     })()
-    // }, [])
+    useEffect(() => {
+        (async () => {
+            const galleryStatus = await ImagePicker.getMediaLibraryPermissionsAsync();
+            setHasGalleryPermission(galleryStatus.status === 'granted');
+        })()
+    }, [])
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -53,9 +59,15 @@ export default function FormModal({ handleClose }) {
         }
     }
 
-    async function fnSubmitMessage({ imageSelf, attendantName, attendantPosition, companyName }) {
+    async function handleSubmitMessage({ imageSelf, attendantName, attendantPosition, companyName }) {
         try {
             handleClose();
+
+            if(!currentUser) {
+                Alert.alert("Atenção!", "Usuário não foi encontrado na sessão!");
+                return;
+            }
+
             await saveMessageInRealtimeDatabase(
                 new ChatMessageBox(
                 id = (new Date()).toISOString(),
@@ -67,15 +79,31 @@ export default function FormModal({ handleClose }) {
                     companyName
                 },
                 user = {
-                    userName: "Marcos",
-                    phoneNumber: "3899854384",
-                    userId: "3899854384"
+                    userName: currentUser?.name,
+                    userEmail: currentUser?.email,
                 }
             ));
         } catch(error) {
             Alert.alert("Error", "Erro ao enviar a mensagem!");
         }
     }
+
+    useEffect(() => {
+        const unsubscribeAuth = onAuthStateChanged(
+            auth,
+            async (authenticatedUser) => {
+                if(authenticatedUser) {
+                    const uid = authenticatedUser?.uid;
+                    const user = await getUserInfoFromRealtimeDatabase(uid);
+                    user && setCurrentUser({
+                        name: user.name,
+                        email: user.email
+                    })
+                }
+            });
+
+        unsubscribeAuth;
+    }, []);
 
     return (
         <View  style={styles.container}>
@@ -100,7 +128,7 @@ export default function FormModal({ handleClose }) {
 
                     <TouchableOpacity
                         style={styles.btnToSend}
-                        onPress={handleSubmit(fnSubmitMessage)}
+                        onPress={handleSubmit(handleSubmitMessage)}
                         activeOpacity={0.8}
                     >
                         <Feather name="send" size={27} color="#FFF" />
@@ -109,7 +137,7 @@ export default function FormModal({ handleClose }) {
 
                 {/* Formulário */}
                 {hasGalleryPermission === false ?
-                <Text style={{ alignSelf: 'center', marginTop: '50%', fontSize: 14, width: '80%', color: '#FFF', textAlign: 'center', fontWeight: 'bold' }}>Você não tem permição para enviar imagem!</Text>
+                <Text style={{ alignSelf: 'center', marginTop: '50%', fontSize: 14, width: '80%', color: '#FFF', textAlign: 'center', fontWeight: 'bold' }}>Você não nos deu permição para enviar imagem!</Text>
                 :
                 <SafeAreaView>
                     <Controller

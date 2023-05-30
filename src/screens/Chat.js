@@ -2,9 +2,10 @@ import React, {
   useState,
   useEffect,
   useLayoutEffect,
+  useRef
 } from 'react';
 
-import { View, TouchableOpacity, Text, FlatList, Modal } from 'react-native';
+import { View, TouchableOpacity, Text, FlatList, Modal, Dimensions } from 'react-native';
 
 import ChatBox from '../components/ChatBox';
 import FormModal from '../components/FormModal';
@@ -19,8 +20,9 @@ import { BlurView } from 'expo-blur';
 export default function Chat() {
   const [messagesData, setMessagesData] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [visibleModal, setVisibleModal]= useState(false);
-  // const flatListRef = useRef(null);
+  const [visibleModal, setVisibleModal] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
+  const flatListRef = useRef(null);
 
   useLayoutEffect(() => {
     const messagesRef = ref(realtimeDatabase, '/messages');
@@ -39,6 +41,8 @@ export default function Chat() {
           }
         }));
       }
+
+      setShouldAutoScroll(true);
     });
 
     return () => {
@@ -50,39 +54,42 @@ export default function Chat() {
     setMessages(messagesData);
   }, [messagesData]);
 
+  useEffect(() => {
+    if (shouldAutoScroll && flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages, shouldAutoScroll]);
+
+  const handleScroll = (event) => {
+    const windowHeight = Dimensions.get('window').height;
+    const scrollPosition = event.nativeEvent.contentOffset.y;
+    const maxScroll = event.nativeEvent.contentSize.height - windowHeight;
+  
+    if (scrollPosition <= maxScroll * 0.75) {
+      setShouldAutoScroll(false);
+    } else {
+      setShouldAutoScroll(true);
+    }
+  };
+
   return (
     <View style={{ flex: 1, paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
-      {/* Componente data flutuante (sticky position) */}
-      {(messages != [] || messages != null || messages != undefined) ?
-        <FlatList
-          style={{ paddingVertical: 7 }}
-          data={messages}
-          renderItem={({ item }) => (
-            <ChatBox
-              key={item.id}
-              id={item.id}
-              user={item.user}
-              content={item.content}
-              sent={item.sent}
-            />
-          )}
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={() => <Text
-            style={{
-              alignSelf: 'center',
-              width: 200,
-              backgroundColor: 'rgba(255, 255, 255, .15)',
-              color: '#FFF',
-              marginTop: 20,
-              paddingVertical: 8,
-              borderRadius: 20,
-              textAlign: 'center',
-              fontSize: 12,
-              fontWeight: 'bold'
-            }}>Carregando...</Text>}
-        />
-        :
-        <Text
+      <FlatList
+        ref={flatListRef}
+        onScroll={handleScroll}
+        style={{ paddingVertical: 7 }}
+        data={messages}
+        renderItem={({ item }) => (
+          <ChatBox
+            key={item.id}
+            id={item.id}
+            user={item.user}
+            content={item.content}
+            sent={item.sent}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        ListEmptyComponent={() => <Text
           style={{
             alignSelf: 'center',
             width: 200,
@@ -94,9 +101,9 @@ export default function Chat() {
             textAlign: 'center',
             fontSize: 12,
             fontWeight: 'bold'
-          }}
-        >Nenhuma mensagem ainda!</Text>
-      }
+          }}>Nenhuma mensagem ainda!</Text>
+        }
+      />
 
       <TouchableOpacity
         style={{

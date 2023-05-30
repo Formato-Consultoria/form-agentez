@@ -58,7 +58,6 @@ function RootNavigator() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // onAuthStateChanged returns an unsubscriber
     const unsubscribeAuth = onAuthStateChanged(
       auth,
       async authenticatedUser => {
@@ -66,7 +65,6 @@ function RootNavigator() {
         setIsLoading(false);
       }
     );
-    // unsubscribe auth listener on unmount
     return unsubscribeAuth;
   }, [user]);
 

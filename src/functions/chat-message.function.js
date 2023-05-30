@@ -1,6 +1,6 @@
 import { ChatMessageBox } from '../models/ChatMessage';
 
-import { ref, set, get } from 'firebase/database';
+import { ref, set, get, child } from 'firebase/database';
 import { realtimeDatabase } from '../../config/firebase';
 
 import Constants from 'expo-constants';
@@ -57,20 +57,33 @@ export async function uploadImageCloudinary(imageUri) {
     }
 }
 
-// Busca uma unica mensagem por meio do id da mensagem
-export function readMessageFromRealtimeDatabase(messageId) {
-    const messageRef = ref(realtimeDatabase, '/messages/message ' + messageId);
-
-    get(messageRef)
-        .then((snapshot) => {
-            if (snapshot.exists()) {
-                const messageData = snapshot.val();
-                return messageData;
-            } else {
-                console.log("A mensagem não existe.");
-            }
-        })
-        .catch((error) => {
-            console.log("Erro ao ler a mensagem:", error);
-        });
+// Busca as informações da sessão
+export async function getUserInfoFromRealtimeDatabase(userId) {
+    try {
+        const snapshot = await get(child(ref(realtimeDatabase), '/sessions/'+userId));
+        if(snapshot.exists()) {
+            const userDatas = snapshot.val();
+            return userDatas;
+        } else return null;
+    } catch (error) {
+        console.log(error);
+    }
 }
+
+// Busca uma unica mensagem por meio do id da mensagem
+// export function readMessageFromRealtimeDatabase(messageId) {
+//     const messageRef = ref(realtimeDatabase, '/messages/message ' + messageId);
+
+//     get(messageRef)
+//         .then((snapshot) => {
+//             if (snapshot.exists()) {
+//                 const messageData = snapshot.val();
+//                 return messageData;
+//             } else {
+//                 console.log("A mensagem não existe.");
+//             }
+//         })
+//         .catch((error) => {
+//             console.log("Erro ao ler a mensagem:", error);
+//         });
+// }

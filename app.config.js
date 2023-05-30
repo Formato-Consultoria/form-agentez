@@ -2,9 +2,10 @@ import 'dotenv/config';
 
 export default {
   "expo": {
-    "name": "ChatApp",
-    "slug": "ChatApp",
+    "name": "formagentez",
+    "slug": "chatapp",
     "version": "1.0.0",
+    "owner": "dcdevs",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -18,17 +19,23 @@ export default {
     "assetBundlePatterns": [
       "**/*"
     ],
+    "scheme": "formagentez",
     "ios": {
+      "bundleIdentifier": "com.chatapp.formagentez",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.chatapp.formagentez",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon-cam.png",
         "backgroundColor": "#0D1117"
-      }
+      },
+      "permissions": ['CAMERA', 'READ_EXTERNAL_STORAGE'],
+      "expoClientId": "66814066011-n6pig89pq374jc2mb108n4s6dt0uuhm5"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "expoClientId": "66814066011-oa2j1u2t5ajj2fbdfjcmmjuo7d4oebpe"
     },
     extra: {
       apiKey: process.env.API_KEY,
@@ -41,6 +48,9 @@ export default {
         CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
         API_KEY: process.env.CLOUDINARY_API_KEY,
         API_SECRET: process.env.CLOUDINARY_API_SECRET,
+      },
+      "eas": {
+        "projectId": "d411c03d-82d4-4790-8f59-097805cf44d3"
       }
     },
     "plugins": [

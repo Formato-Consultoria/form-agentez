@@ -38,12 +38,12 @@ export default function FormModal({ handleClose }) {
         resolver: yupResolver(schema)
     })
 
-    useEffect(() => {
-        (async () => {
-            const galleryStatus = await ImagePicker.getMediaLibraryPermissionsAsync();
-            setHasGalleryPermission(galleryStatus.status === 'granted');
-        })()
-    }, [])
+    // useEffect(() => {
+    //     (async () => {
+    //         const galleryStatus = await ImagePicker.getMediaLibraryPermissionsAsync();
+    //         setHasGalleryPermission(galleryStatus.status === 'granted');
+    //     })()
+    // }, [])
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -136,9 +136,9 @@ export default function FormModal({ handleClose }) {
                 </View>
 
                 {/* Formulário */}
-                {hasGalleryPermission === false ?
+                {/* {hasGalleryPermission === false ?
                 <Text style={{ alignSelf: 'center', marginTop: '50%', fontSize: 14, width: '80%', color: '#FFF', textAlign: 'center', fontWeight: 'bold' }}>Você não nos deu permição para enviar imagem!</Text>
-                :
+                : */}
                 <SafeAreaView>
                     <Controller
                         control={control}
@@ -241,8 +241,7 @@ export default function FormModal({ handleClose }) {
                         )}
                     />
                     {errors.companyName && <Text style={styles.labelError}>{`* ${errors.companyName?.message}`}</Text>}
-
-                </SafeAreaView>}
+                </SafeAreaView>
             </View>
         </View>
     )

@@ -74,6 +74,7 @@ export default function Chat() {
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
+      {(messages !== [] || messages !== null || messages !== undefined) ?
       <FlatList
         ref={flatListRef}
         onScroll={handleScroll}
@@ -104,6 +105,20 @@ export default function Chat() {
           }}>Nenhuma mensagem ainda!</Text>
         }
       />
+    :
+    <Text
+      style={{
+        alignSelf: 'center',
+        width: 200,
+        backgroundColor: 'rgba(255, 255, 255, .15)',
+        color: '#FFF',
+        marginTop: 20,
+        paddingVertical: 8,
+        borderRadius: 20,
+        textAlign: 'center',
+        fontSize: 12,
+        fontWeight: 'bold'
+    }}>Nenhuma mensagem ainda!</Text>}
 
       <TouchableOpacity
         style={{

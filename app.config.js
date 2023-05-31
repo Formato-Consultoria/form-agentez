@@ -22,7 +22,12 @@ export default {
     "scheme": "formagentez",
     "ios": {
       "bundleIdentifier": "com.chatapp.formagentez",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE"
+      ],
     },
     "android": {
       "package": "com.chatapp.formagentez",
@@ -30,7 +35,11 @@ export default {
         "foregroundImage": "./assets/icon-cam.png",
         "backgroundColor": "#0D1117"
       },
-      "permissions": ['CAMERA', 'READ_EXTERNAL_STORAGE'],
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE"
+      ],
       "expoClientId": "66814066011-n6pig89pq374jc2mb108n4s6dt0uuhm5"
     },
     "web": {
@@ -50,15 +59,21 @@ export default {
         API_SECRET: process.env.CLOUDINARY_API_SECRET,
       },
       "eas": {
-        "projectId": "d411c03d-82d4-4790-8f59-097805cf44d3"
+        "projectId": "6ee402ab-552b-4c28-8c7c-8b8c1e5041e2"
       }
     },
     "plugins": [
       [
         "expo-image-picker",
         {
-          "photosPermission": "Permita que FormAgentez acesse suas fotos",
-          "cameraPermission": "Permita que FormAgentez acesse sua câmera"
+          "ios": {
+            "NSCameraUsageDescription": "Permita que FormAgentez acesse sua câmera",
+            "NSPhotoLibraryUsageDescription": "Permita que FormAgentez acesse suas fotos"
+          },
+          "android": {
+            "cameraPermission": "Permita que FormAgentez acesse sua câmera",
+            "mediaLibraryPermission": "Permita que FormAgentez acesse suas fotos"
+          }
         }
       ]
     ],

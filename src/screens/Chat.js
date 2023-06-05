@@ -17,15 +17,12 @@ import colors from '../../colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
 
-import * as ImagePicker from 'expo-image-picker';
-
 export default function Chat() {
   const [messagesData, setMessagesData] = useState([]);
   const [messages, setMessages] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
   const flatListRef = useRef(null);
-  const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
 
   useLayoutEffect(() => {
     const messagesRef = ref(realtimeDatabase, '/messages');
@@ -80,14 +77,6 @@ export default function Chat() {
   function verifyMessages(arrayMessage) {
     return (arrayMessage !== [] || arrayMessage !== null || arrayMessage !== undefined);
   }
-
-  useEffect(() => {
-    (async () => {
-        const galleryStatus = await ImagePicker.getMediaLibraryPermissionsAsync();
-        // setHasGalleryPermission(galleryStatus.status === 'granted'); // undetermined
-        setHasGalleryPermission(galleryStatus.status === 'undetermined'); // provisorio
-    })()
-  }, [])
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
@@ -172,7 +161,7 @@ export default function Chat() {
       >
         <FormModal
           handleClose={() => setVisibleModal(false)}
-          hasGalleryPermission={hasGalleryPermission}
+          // hasGalleryPermission={hasGalleryPermission}
         />
       </Modal>
     </View>

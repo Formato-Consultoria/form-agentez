@@ -29,7 +29,7 @@ const schema = yup.object({
     companyName: yup.string().required("Informe o nome da empresa!"),
 })
 
-export default function FormModal({ handleClose, hasGalleryPermission }) {
+export default function FormModal({ handleClose }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [image, setImage] = useState(null);
 
@@ -128,9 +128,6 @@ export default function FormModal({ handleClose, hasGalleryPermission }) {
                 </View>
 
                 {/* Formulário */}
-                {hasGalleryPermission === false ?
-                <Text style={{ alignSelf: 'center', marginTop: '50%', fontSize: 14, width: '80%', color: '#FFF', textAlign: 'center', fontWeight: 'bold' }}>Você não nos deu permição para enviar imagem!</Text>
-                :
                 <SafeAreaView>
                     <Controller
                         control={control}
@@ -233,7 +230,7 @@ export default function FormModal({ handleClose, hasGalleryPermission }) {
                         )}
                     />
                     {errors.companyName && <Text style={styles.labelError}>{`* ${errors.companyName?.message}`}</Text>}
-                </SafeAreaView>}
+                </SafeAreaView>
             </View>
         </View>
     )

@@ -29,21 +29,13 @@ const schema = yup.object({
     companyName: yup.string().required("Informe o nome da empresa!"),
 })
 
-export default function FormModal({ handleClose }) {
+export default function FormModal({ handleClose, hasGalleryPermission }) {
     const [currentUser, setCurrentUser] = useState(null);
-    const [hasGalleryPermission, setHasGalleryPermission] = useState(true);
     const [image, setImage] = useState(null);
 
     const { control, handleSubmit, formState: { errors }, setValue } = useForm({
         resolver: yupResolver(schema)
     })
-
-    // useEffect(() => {
-    //     (async () => {
-    //         const galleryStatus = await ImagePicker.getMediaLibraryPermissionsAsync();
-    //         setHasGalleryPermission(galleryStatus.status === 'granted');
-    //     })()
-    // }, [])
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -136,9 +128,9 @@ export default function FormModal({ handleClose }) {
                 </View>
 
                 {/* Formulário */}
-                {/* {hasGalleryPermission === false ?
+                {hasGalleryPermission === false ?
                 <Text style={{ alignSelf: 'center', marginTop: '50%', fontSize: 14, width: '80%', color: '#FFF', textAlign: 'center', fontWeight: 'bold' }}>Você não nos deu permição para enviar imagem!</Text>
-                : */}
+                :
                 <SafeAreaView>
                     <Controller
                         control={control}
@@ -241,7 +233,7 @@ export default function FormModal({ handleClose }) {
                         )}
                     />
                     {errors.companyName && <Text style={styles.labelError}>{`* ${errors.companyName?.message}`}</Text>}
-                </SafeAreaView>
+                </SafeAreaView>}
             </View>
         </View>
     )

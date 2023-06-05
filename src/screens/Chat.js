@@ -17,12 +17,15 @@ import colors from '../../colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
 
+import * as ImagePicker from 'expo-image-picker';
+
 export default function Chat() {
   const [messagesData, setMessagesData] = useState([]);
   const [messages, setMessages] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
   const flatListRef = useRef(null);
+  const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
 
   useLayoutEffect(() => {
     const messagesRef = ref(realtimeDatabase, '/messages');
@@ -42,7 +45,7 @@ export default function Chat() {
         }));
       }
 
-      setShouldAutoScroll(true);
+      !verifyMessages(messages) && setShouldAutoScroll(true);
     });
 
     return () => {
@@ -55,26 +58,40 @@ export default function Chat() {
   }, [messagesData]);
 
   useEffect(() => {
-    if (shouldAutoScroll && flatListRef.current) {
+    if (shouldAutoScroll && flatListRef.current && verifyMessages(messages)) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages, shouldAutoScroll]);
 
   const handleScroll = (event) => {
-    const windowHeight = Dimensions.get('window').height;
-    const scrollPosition = event.nativeEvent.contentOffset.y;
-    const maxScroll = event.nativeEvent.contentSize.height - windowHeight;
-  
-    if (scrollPosition <= maxScroll * 0.75) {
-      setShouldAutoScroll(false);
-    } else {
-      setShouldAutoScroll(true);
+    if(verifyMessages(messages)) {
+      const windowHeight = Dimensions.get('window').height;
+      const scrollPosition = event.nativeEvent.contentOffset.y;
+      const maxScroll = event.nativeEvent.contentSize.height - windowHeight;
+    
+      if (scrollPosition <= maxScroll * 0.75) {
+        setShouldAutoScroll(false);
+      } else {
+        setShouldAutoScroll(true);
+      }
     }
   };
 
+  function verifyMessages(arrayMessage) {
+    return (arrayMessage !== [] || arrayMessage !== null || arrayMessage !== undefined);
+  }
+
+  useEffect(() => {
+    (async () => {
+        const galleryStatus = await ImagePicker.getMediaLibraryPermissionsAsync();
+        // setHasGalleryPermission(galleryStatus.status === 'granted'); // undetermined
+        setHasGalleryPermission(galleryStatus.status === 'undetermined'); // provisorio
+    })()
+  }, [])
+
   return (
     <View style={{ flex: 1, paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
-      {(messages !== [] || messages !== null || messages !== undefined) ?
+      {verifyMessages(messages) ?
       <FlatList
         ref={flatListRef}
         onScroll={handleScroll}
@@ -155,6 +172,7 @@ export default function Chat() {
       >
         <FormModal
           handleClose={() => setVisibleModal(false)}
+          hasGalleryPermission={hasGalleryPermission}
         />
       </Modal>
     </View>

@@ -6,7 +6,8 @@ export class ChatMessageBox {
       imageSelf: '',
       attendantName: '',
       attendantPosition: '',
-      companyName: ''
+      companyName: '',
+      companyCity: '',
     },
     user = {
       userEmail: '',

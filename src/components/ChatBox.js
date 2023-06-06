@@ -22,8 +22,11 @@ export default function ChatBox({ id, user, content, sent } = new ChatMessageBox
                 <View style={styles.balloon}>
                     <Text style={styles.balloonText}>{content?.companyName}</Text>
                 </View>
+                <View style={styles.balloon}>
+                    <Text style={styles.balloonText}>{content?.companyCity}</Text>
+                </View>
             </View>
-            <Text style={styles.time}>{moment(sent).format('mm:ss')}</Text>
+            <Text style={styles.time}>{moment(sent).format('DD/MM/YYY HH:mm:ss')}</Text>
         </View>
     );
 }
@@ -74,7 +77,7 @@ const styles = StyleSheet.create({
     time: {
         color: '#FFF',
         alignSelf: 'flex-end',
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: 'normal',
         marginRight: 7,
         marginBottom: 5

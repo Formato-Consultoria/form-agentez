@@ -21,10 +21,11 @@ import { auth } from "../../config/firebase";
 import { onAuthStateChanged } from 'firebase/auth';
 
 const schema = yup.object({
-    imageSelf: yup.mixed().required("Precisamos de uma imagem!"),
-    attendantName: yup.string().required("Informe o nome do atendente!"),
-    attendantPosition: yup.string().required("Informe o cargo do atendente!"),
-    companyName: yup.string().required("Informe o nome da empresa!"),
+    imageSelf: yup.mixed().required("Por favor, forneça uma imagem."),
+    attendantName: yup.string().required("Por favor, informe o nome do atendente."),
+    attendantPosition: yup.string().required("Por favor, informe o cargo do atendente."),
+    companyName: yup.string().required("Por favor, forneça o nome da empresa."),
+    companyCity: yup.string().required("Por favor, informe o nome da cidade onde a empresa está localizada."),
 })
 
 export default function FormModal({ handleClose }) {
@@ -40,7 +41,7 @@ export default function FormModal({ handleClose }) {
         fileInputRef.current.click();
     };
 
-    async function handleSubmitMessage({ imageSelf, attendantName, attendantPosition, companyName }) {
+    async function handleSubmitMessage({ imageSelf, attendantName, attendantPosition, companyName, companyCity }) {
         try {
             handleClose();
 
@@ -57,7 +58,8 @@ export default function FormModal({ handleClose }) {
                 imageSelf: imageCloud,
                 attendantName,
                 attendantPosition,
-                companyName
+                companyName,
+                companyCity
             };
 
             const user = {
@@ -245,6 +247,29 @@ export default function FormModal({ handleClose }) {
                         )}
                     />
                     {errors.companyName && <Text style={styles.labelError}>{`* ${errors.companyName?.message}`}</Text>}
+
+                    <Controller
+                        control={control}
+                        name='companyCity'
+                        render={({ field: { onChange, value } }) => (
+                            <TextInput
+                                style={[
+                                    styles.input, {
+                                        borderWidth: errors.companyCity && 1,
+                                        borderColor: errors.companyCity && '#FF375B'
+                                    }
+                                ]}
+                                placeholderTextColor="rgba(238, 238, 238, 0.5)"
+                                placeholder="Cidade"
+                                autoCapitalize="words"
+                                keyboardType="default"
+                                textContentType="addressCity"
+                                value={value}
+                                onChangeText={onChange}
+                            />
+                        )}
+                    />
+                    {errors.companyCity && <Text style={styles.labelError}>{`* ${errors.companyCity?.message}`}</Text>}
                 </SafeAreaView>
             </View>
         </View>

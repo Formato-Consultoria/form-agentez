@@ -1,9 +1,7 @@
 import { View, Text, Image, TextInput, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
 
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-
-import * as ImagePicker from 'expo-image-picker';
+import { useEffect, useState, useRef } from 'react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -23,7 +21,7 @@ import { auth } from "../../config/firebase";
 import { onAuthStateChanged } from 'firebase/auth';
 
 const schema = yup.object({
-    imageSelf: yup.string().required("Precisamos de uma imagem!"),
+    imageSelf: yup.mixed().required("Precisamos de uma imagem!"),
     attendantName: yup.string().required("Informe o nome do atendente!"),
     attendantPosition: yup.string().required("Informe o cargo do atendente!"),
     companyName: yup.string().required("Informe o nome da empresa!"),
@@ -31,52 +29,48 @@ const schema = yup.object({
 
 export default function FormModal({ handleClose }) {
     const [currentUser, setCurrentUser] = useState(null);
-    const [image, setImage] = useState(null);
+    const [imageURL, setImageURL] = useState(null);
+    const fileInputRef = useRef(null);
 
-    const { control, handleSubmit, formState: { errors }, setValue } = useForm({
-        resolver: yupResolver(schema)
+    const { control, handleSubmit, formState: { errors } } = useForm({
+        resolver: yupResolver(schema),
     })
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4,3],
-            quality: 1,
-        })
-        
-        if(!result?.canceled) {
-            setImage(result.assets[0].uri);
-            setValue('imageSelf', result.assets[0].uri);
-        }
-    }
+    const handleImageUpload = () => {
+        fileInputRef.current.click();
+    };
 
     async function handleSubmitMessage({ imageSelf, attendantName, attendantPosition, companyName }) {
         try {
             handleClose();
 
             if(!currentUser) {
-                Alert.alert("Atenção!", "Usuário não foi encontrado na sessão!");
+                alert("Atenção! Usuário não foi encontrado na sessão!");
                 return;
             }
 
+            const id = (new Date()).toISOString();
+            const imageCloud = await uploadImageCloudinary(imageSelf);
+            const sent = (new Date()).toISOString();
+
+            const content = {
+                imageSelf: imageCloud,
+                attendantName,
+                attendantPosition,
+                companyName
+            };
+
+            const user = {
+                userName: currentUser?.name,
+                userEmail: currentUser?.email,
+            };
+
             await saveMessageInRealtimeDatabase(
-                new ChatMessageBox(
-                id = (new Date()).toISOString(),
-                sent = (new Date()).toISOString(),
-                content = {
-                    imageSelf: await uploadImageCloudinary(imageSelf),
-                    attendantName,
-                    attendantPosition,
-                    companyName
-                },
-                user = {
-                    userName: currentUser?.name,
-                    userEmail: currentUser?.email,
-                }
-            ));
+                new ChatMessageBox(id, sent, content, user)
+            );
         } catch(error) {
-            Alert.alert("Error", "Erro ao enviar a mensagem!");
+            console.error(error);
+            alert("Error ao enviar a mensagem!");
         }
     }
 
@@ -132,7 +126,7 @@ export default function FormModal({ handleClose }) {
                     <Controller
                         control={control}
                         name='imageSelf'
-                        render={({ field: { value } }) => (
+                        render={({ field: { onChange, value } }) => (
                             <TouchableOpacity
                                 style={[
                                     styles.btnUploadImage, {
@@ -140,25 +134,46 @@ export default function FormModal({ handleClose }) {
                                         backgroundColor: errors.imageSelf ? 'rgba(248,162,177,.20)' : 'rgba(255,255,255,0.20)'
                                     }
                                 ]}
-                                onPress={pickImage}
+                                onPress={handleImageUpload}
                                 activeOpacity={0.8}
-                            >{image ?
-                                <Image
-                                    source={{
-                                        uri: image
-                                    }}
-                                    style={[
-                                        styles.imageUpload,
-                                    ]}
-                                />
-                                :
-                                <Ionicons
-                                    style={{ alignSelf: 'center' }}
-                                    name="image"
-                                    size={130}
-                                    color={errors.imageSelf ? '#ff375b' : "#FFF"}
-                                />
-                            }</TouchableOpacity>
+                            >
+                                {imageURL ? (
+                                    <Image
+                                        source={{
+                                            uri: imageURL
+                                        }}
+                                        style={[
+                                            styles.imageUpload,
+                                        ]}
+                                    />
+                                ) : (
+                                    <Ionicons
+                                        style={{ alignSelf: 'center' }}
+                                        name="image"
+                                        size={130}
+                                        color={errors.imageSelf ? '#ff375b' : "#FFF"}
+                                    />
+                                )}
+                                <View>
+                                    <input
+                                        type="file"
+                                        style={styles.fileInput}
+                                        ref={fileInputRef}
+                                        onChange={(e) => {
+                                            const fileObject = e.target.files[0];
+                                            if (!fileObject.type.startsWith("image/")) {
+                                                setValidationError("Por favor, selecione um arquivo de imagem.");
+                                                return;
+                                            }
+
+                                            const imageURL = URL.createObjectURL(fileObject);
+
+                                            setImageURL(imageURL);
+                                            onChange(fileObject);
+                                        }}
+                                    />
+                                </View>
+                            </TouchableOpacity>
                         )}
                     />
 
@@ -290,5 +305,8 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         marginLeft: 5,
         fontSize: 11
-    }
+    },
+    fileInput: {
+        display: 'none',
+    },
 })

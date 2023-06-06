@@ -33,7 +33,7 @@ export default {
       "package": "com.chatapp.formagentez",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon-cam.png",
-        "backgroundColor": "#0D1117"
+        "backgroundColor": "#0D1117"  
       },
       "permissions": [
         "CAMERA",
@@ -44,6 +44,8 @@ export default {
     },
     "web": {
       "favicon": "./assets/favicon.png",
+      "backgroundColor": "#0D1117",
+      "lang": "pt_BR",
       "expoClientId": "66814066011-oa2j1u2t5ajj2fbdfjcmmjuo7d4oebpe"
     },
     extra: {

@@ -66,7 +66,7 @@ export default function Chat() {
       const scrollPosition = event.nativeEvent.contentOffset.y;
       const maxScroll = event.nativeEvent.contentSize.height - windowHeight;
     
-      if (scrollPosition <= maxScroll * 0.75) {
+      if (scrollPosition <= maxScroll * 0.70) {
         setShouldAutoScroll(false);
       } else {
         setShouldAutoScroll(true);

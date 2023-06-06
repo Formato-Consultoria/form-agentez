@@ -46,7 +46,7 @@ export default function LoginRegister() {
       .then(() => {
         console.log("login successfully");
     }).catch((err) => {
-      Alert.alert("Erro ao fazer login:", err.message);
+      alert("Erro ao fazer login:", err.message);
     });
   };
   
@@ -63,7 +63,7 @@ export default function LoginRegister() {
       .then(({ user }) => {
         saveUserSessionToDatabaseInRealTime(user.uid,  { name: name, email: email });
     }).catch((err) => {
-      Alert.alert("Erro ao fazer o registro:", err.message);
+      alert("Erro ao fazer o registro:", err.message);
     });
   };
 
@@ -168,7 +168,7 @@ export default function LoginRegister() {
             styles.button,
             { display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center', justifyContent: 'center' }
           ]}
-          onPress={() => {}}
+          onPress={() => {}} // AQUIIIIIIIIIII!!
         >
           <EvilIcons name="sc-google-plus" size={24} color="black" />
           <Text style={{ fontWeight: '500', color: '#000', fontSize: 15 }}>

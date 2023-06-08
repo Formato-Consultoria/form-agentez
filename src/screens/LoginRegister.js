@@ -7,7 +7,6 @@ import { StyleSheet,
   SafeAreaView,
   TouchableOpacity,
   StatusBar,
-  Alert
 } from "react-native";
 
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -21,6 +20,7 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithRedirect,
+  signInWithPopup
 } from "firebase/auth";
 
 import ToggleNavigation from "../components/ToggleNavigation";
@@ -69,8 +69,9 @@ export default function LoginRegister() {
     });
   };
 
-  const handleGoogleSigin = () => {
+  const handleGoogleSigin = async () => {
     const provider = new GoogleAuthProvider();
+
     function changeNamePattern(name) {
       let newName = '';
 
@@ -89,26 +90,24 @@ export default function LoginRegister() {
       return newName;
     }
 
-    signInWithRedirect(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        const userInfo = {
-          name: changeNamePattern(user.displayName),
-          email: user.email,
-          picture: user.photoURL,
-          verified_email: user.emailVerified
-        };
+    try {
+      const result = await signInWithPopup(auth, provider);
 
-        console.log(userInfo);
-        saveUserSessionToDatabaseInRealTime(user.uid, userInfo);
-      }).catch((error) => {
-        console.error(error);
+      const user = result.user;
+      const userInfo = {
+        name: changeNamePattern(user.displayName),
+        email: user.email,
+        picture: user.photoURL,
+        verified_email: user.emailVerified
+      };
+      saveUserSessionToDatabaseInRealTime(user.uid, userInfo);
+    } catch (error) {
+      console.error(error);
+      const errorCode = error.code;
+      const errorMessage = error.message;
 
-        const errorCode = error.code;
-        const errorMessage = error.message;
-
-        alert('Erro: ' + errorCode + ' - ' + errorMessage);
-      })
+      alert('Erro: ' + errorCode + ' - ' + errorMessage);
+    }    
   }
 
   const [isLoginActive, setIsLoginActive] = useState(true);

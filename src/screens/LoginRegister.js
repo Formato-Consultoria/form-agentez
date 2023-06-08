@@ -19,6 +19,9 @@ import { auth, realtimeDatabase } from "../../config/firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithRedirect,
+  signInWithPopup
 } from "firebase/auth";
 
 import ToggleNavigation from "../components/ToggleNavigation";
@@ -66,6 +69,48 @@ export default function LoginRegister() {
       alert("Erro ao fazer o registro:", err.message);
     });
   };
+
+  const handleGoogleSigin = () => {
+    const provider = new GoogleAuthProvider();
+    function changeNamePattern(name) {
+      let newName = '';
+
+      const words = name.trim().split(' ');
+
+      if (words.length > 2) {
+        newName = words[0] + ' ' + words[words.length - 1];
+      } else {
+        newName = name;
+      }
+
+      newName = newName.replace(/\w\S*/g, (word) => {
+        return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
+      });
+
+      return newName;
+    }
+
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+        const userInfo = {
+          name: changeNamePattern(user.displayName),
+          email: user.email,
+          picture: user.photoURL,
+          verified_email: user.emailVerified
+        };
+
+        console.log(userInfo);
+        saveUserSessionToDatabaseInRealTime(user.uid, userInfo);
+      }).catch((error) => {
+        console.error(error);
+
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        alert('Erro: ' + errorCode + ' - ' + errorMessage);
+      })
+  }
 
   const [isLoginActive, setIsLoginActive] = useState(true);
 
@@ -162,19 +207,19 @@ export default function LoginRegister() {
           </Text>
         </TouchableOpacity>
 
-        {/* {isLoginActive && <View>
+        {isLoginActive && <View>
         <MaterialCommunityIcons style={{ marginBottom: 10, alignSelf: 'center' }} name="music-note-whole-dotted" size={24} color="#FFF" />
         <TouchableOpacity style={[
             styles.button,
             { display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center', justifyContent: 'center' }
           ]}
-          onPress={() => {}} // AQUIIIIIIIIIII!!
+          onPress={handleGoogleSigin}
         >
           <EvilIcons name="sc-google-plus" size={24} color="black" />
           <Text style={{ fontWeight: '500', color: '#000', fontSize: 15 }}>
             Login com Google
           </Text>
-        </TouchableOpacity></View>} */}
+        </TouchableOpacity></View>}
       </SafeAreaView>
       <StatusBar barStyle="light-content" />
     </View>

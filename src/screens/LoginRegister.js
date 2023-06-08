@@ -21,7 +21,6 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithRedirect,
-  signInWithPopup
 } from "firebase/auth";
 
 import ToggleNavigation from "../components/ToggleNavigation";
@@ -90,7 +89,7 @@ export default function LoginRegister() {
       return newName;
     }
 
-    signInWithPopup(auth, provider)
+    signInWithRedirect(auth, provider)
       .then((result) => {
         const user = result.user;
         const userInfo = {

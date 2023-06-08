@@ -74,29 +74,52 @@ export default function Chat() {
     }
   };
 
+  const scrollToEnd = () => {
+    if(verifyMessages(messages)) {
+      flatListRef.current.scrollToEnd({ animated: true })
+    }
+  }
+
   function verifyMessages(arrayMessage) {
     return (arrayMessage !== [] || arrayMessage !== null || arrayMessage !== undefined);
   }
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
+    <View style={{ height: 'calc(100vh - 42px)', paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
       {verifyMessages(messages) ?
-      <FlatList
-        ref={flatListRef}
-        onScroll={handleScroll}
-        style={{ paddingVertical: 7 }}
-        data={messages}
-        renderItem={({ item }) => (
-          <ChatBox
-            key={item.id}
-            id={item.id}
-            user={item.user}
-            content={item.content}
-            sent={item.sent}
-          />
-        )}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={() => <Text
+        <FlatList
+          ref={flatListRef}
+          onScroll={handleScroll}
+          onContentSizeChange={scrollToEnd}
+          style={{ paddingVertical: 7 }}
+          data={messages}
+          renderItem={({ item }) => (
+            <ChatBox
+              key={item.id}
+              id={item.id}
+              user={item.user}
+              content={item.content}
+              sent={item.sent}
+            />
+          )}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={() => <Text
+            style={{
+              alignSelf: 'center',
+              width: 200,
+              backgroundColor: 'rgba(255, 255, 255, .15)',
+              color: '#FFF',
+              marginTop: 20,
+              paddingVertical: 8,
+              borderRadius: 20,
+              textAlign: 'center',
+              fontSize: 12,
+              fontWeight: 'bold'
+            }}>Nenhuma mensagem ainda!</Text>
+          }
+        />
+      :
+        <Text
           style={{
             alignSelf: 'center',
             width: 200,
@@ -108,23 +131,8 @@ export default function Chat() {
             textAlign: 'center',
             fontSize: 12,
             fontWeight: 'bold'
-          }}>Nenhuma mensagem ainda!</Text>
-        }
-      />
-    :
-    <Text
-      style={{
-        alignSelf: 'center',
-        width: 200,
-        backgroundColor: 'rgba(255, 255, 255, .15)',
-        color: '#FFF',
-        marginTop: 20,
-        paddingVertical: 8,
-        borderRadius: 20,
-        textAlign: 'center',
-        fontSize: 12,
-        fontWeight: 'bold'
-    }}>Nenhuma mensagem ainda!</Text>}
+        }}>Nenhuma mensagem ainda!</Text>
+      }
 
       <TouchableOpacity
         style={{
@@ -161,7 +169,6 @@ export default function Chat() {
       >
         <FormModal
           handleClose={() => setVisibleModal(false)}
-          // hasGalleryPermission={hasGalleryPermission}
         />
       </Modal>
     </View>

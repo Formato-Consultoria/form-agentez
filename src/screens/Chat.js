@@ -5,7 +5,7 @@ import React, {
   useRef
 } from 'react';
 
-import { View, TouchableOpacity, Text, FlatList, Modal, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Text, FlatList, SafeAreaView, Modal, Dimensions } from 'react-native';
 
 import ChatBox from '../components/ChatBox';
 import FormModal from '../components/FormModal';
@@ -41,8 +41,6 @@ export default function Chat() {
           }
         }));
       }
-
-      !verifyMessages(messages) && setShouldAutoScroll(true);
     });
 
     return () => {
@@ -55,24 +53,10 @@ export default function Chat() {
   }, [messagesData]);
 
   useEffect(() => {
-    if (shouldAutoScroll && flatListRef.current && verifyMessages(messages)) {
+    if (verifyMessages(messages)) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages, shouldAutoScroll]);
-
-  const handleScroll = (event) => {
-    if(verifyMessages(messages)) {
-      const windowHeight = Dimensions.get('window').height;
-      const scrollPosition = event.nativeEvent.contentOffset.y;
-      const maxScroll = event.nativeEvent.contentSize.height - windowHeight;
-    
-      if (scrollPosition <= maxScroll * 0.70) {
-        setShouldAutoScroll(false);
-      } else {
-        setShouldAutoScroll(true);
-      }
-    }
-  };
 
   const scrollToEnd = () => {
     if(verifyMessages(messages)) {
@@ -85,13 +69,12 @@ export default function Chat() {
   }
 
   return (
-    <View style={{ height: 'calc(100vh - 42px)', paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
+    <View style={{ height: 'calc(100vh - 42px)', overflow: 'hidden', paddingHorizontal: 10, paddingBottom: 10, backgroundColor: colors.backgroundChat }}>
       {verifyMessages(messages) ?
         <FlatList
           ref={flatListRef}
-          onScroll={handleScroll}
           onContentSizeChange={scrollToEnd}
-          style={{ paddingVertical: 7 }}
+          style={{ paddingVertical: 7, overflow: 'auto', scrollbarWidth: 'none', scrollbarColor: 'transparent transparent', '-webkit-overflow-scrolling': 'touch' }}
           data={messages}
           renderItem={({ item }) => (
             <ChatBox
@@ -133,33 +116,34 @@ export default function Chat() {
             fontWeight: 'bold'
         }}>Nenhuma mensagem ainda!</Text>
       }
-
-      <TouchableOpacity
-        style={{
-          position: 'absolute',
-          bottom: 25,
-          right: 25,
-        }}
-        onPress={() => setVisibleModal(true)}
-        activeOpacity={0.85}
-      >
-        <BlurView
-          intensity={100}
+      <SafeAreaView>
+        <TouchableOpacity
           style={{
-            paddingLeft: 3,
-            borderRadius: 999,
-            borderWidth: 1,
-            borderStyle: 'solid',
-            borderColor: '#FFF',
+            position: 'fixed',
+            bottom: 32,
+            right: 25,
           }}
+          onPress={() => setVisibleModal(true)}
+          activeOpacity={0.85}
         >
-          <Ionicons
-            name="add-circle"
-            size={48}
-            color="#FFF"
-          />
-        </BlurView>
-      </TouchableOpacity>
+          <BlurView
+            intensity={100}
+            style={{
+              paddingLeft: 3,
+              borderRadius: 999,
+              borderWidth: 1,
+              borderStyle: 'solid',
+              borderColor: '#FFF',
+            }}
+          >
+            <Ionicons
+              name="add-circle"
+              size={48}
+              color="#FFF"
+            />
+          </BlurView>
+        </TouchableOpacity>
+      </SafeAreaView>
 
       <Modal
         animationType="slide"

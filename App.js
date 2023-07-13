@@ -1,9 +1,15 @@
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, ActivityIndicator, Image } from 'react-native';
+import { View, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
+
+import {
+  migrateMessageInDatabaseFirestore,
+  fetchAllLastSentMessages
+} from './src/functions/chat-message.function';
 
 import LoginRegister from './src/screens/LoginRegister';
 import Chat from './src/screens/Chat';
@@ -21,6 +27,11 @@ const AuthenticatedUserProvider = ({ children }) => {
 };
 
 function ChatStack() {
+  async function loadData() {
+    const messages = fetchAllLastSentMessages();
+    migrateMessageInDatabaseFirestore(messages);
+  }
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -33,6 +44,15 @@ function ChatStack() {
               style={{ width: 30, height: 30, marginLeft: 15 }}
             />
           ),
+          // headerRight: () => (
+          //   <TouchableOpacity
+          //       style={{ width: 30, height: 30, marginRight: 20 }}
+          //       onPress={loadData}
+          //       activeOpacity={0.8}
+          //   >
+          //     <MaterialCommunityIcons name="database-export" size={27} color="#FFF" />
+          //   </TouchableOpacity>
+          // ),
           headerTitle: '',
           headerShadowVisible: false,
           headerStyle: {

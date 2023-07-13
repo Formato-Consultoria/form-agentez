@@ -21,7 +21,6 @@ export default function Chat() {
   const [messagesData, setMessagesData] = useState([]);
   const [messages, setMessages] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
   const flatListRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -56,7 +55,7 @@ export default function Chat() {
     if (verifyMessages(messages)) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
-  }, [messages, shouldAutoScroll]);
+  }, [messages]);
 
   const scrollToEnd = () => {
     if(verifyMessages(messages)) {

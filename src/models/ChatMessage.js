@@ -3,11 +3,13 @@ export class ChatMessageBox {
     id = '',
     sent = '',
     content = {
-      imageSelf: '',
+      images: [],
+      nameAgente: '',
       attendantName: '',
       attendantPosition: '',
       companyName: '',
       companyCity: '',
+      companyCNPJ: ''
     },
     user = {
       userEmail: '',

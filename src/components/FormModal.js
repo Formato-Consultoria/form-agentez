@@ -1,4 +1,5 @@
 import { View, Text, Image, TextInput, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+import { TextInputMask } from 'react-native-masked-text';
 
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import { useEffect, useState, useRef } from 'react';
@@ -15,17 +16,19 @@ import {
     uploadImageCloudinary,
     getUserInfoFromRealtimeDatabase
 } from '../functions/chat-message.function';
-import { Alert } from 'react-native';
 
 import { auth } from "../../config/firebase";
 import { onAuthStateChanged } from 'firebase/auth';
 
 const schema = yup.object({
-    imageSelf: yup.mixed().required("Por favor, forneça uma imagem."),
+    images: yup.mixed().required("Por favor, forneça uma imagem."),
+    nameAgente: yup.string().required("Por favor, informe o nome do atendente."),
     attendantName: yup.string().required("Por favor, informe o nome do atendente."),
     attendantPosition: yup.string().required("Por favor, informe o cargo do atendente."),
     companyName: yup.string().required("Por favor, forneça o nome da empresa."),
     companyCity: yup.string().required("Por favor, informe o nome da cidade onde a empresa está localizada."),
+    companyCNPJ: yup.string().required("Por favor, informe o CNPJ da empresa")
+        .matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, "Por favor, informe um CNPJ válido.")
 })
 
 export default function FormModal({ handleClose }) {
@@ -33,15 +36,25 @@ export default function FormModal({ handleClose }) {
     const [imageURL, setImageURL] = useState(null);
     const fileInputRef = useRef(null);
 
-    const { control, handleSubmit, formState: { errors } } = useForm({
+    const { control, handleSubmit, formState: { errors }, watch } = useForm({
         resolver: yupResolver(schema),
+        defaultValues: {
+            images: [],
+            nameAgente: '',
+            attendantName: '',
+            attendantPosition: '',
+            companyName: '',
+            companyCity: '',
+            companyCNPJ: ''
+        }
     })
+    let changeImagens = watch('images');
 
     const handleImageUpload = () => {
         fileInputRef.current.click();
     };
 
-    async function handleSubmitMessage({ imageSelf, attendantName, attendantPosition, companyName, companyCity }) {
+    async function handleSubmitMessage({ images, nameAgente, attendantName, attendantPosition, companyName, companyCity, companyCNPJ }) {
         try {
             handleClose();
 
@@ -51,15 +64,20 @@ export default function FormModal({ handleClose }) {
             }
 
             const id = (new Date()).toISOString();
-            const imageCloud = await uploadImageCloudinary(imageSelf);
+            const arrImageCloud = await Promise.all(images.map(async (image) => 
+                await uploadImageCloudinary(image)
+            ))
+
             const sent = (new Date()).toISOString();
 
             const content = {
-                imageSelf: imageCloud,
+                images: arrImageCloud,
+                nameAgente: nameAgente,
                 attendantName,
                 attendantPosition,
                 companyName,
-                companyCity
+                companyCity,
+                companyCNPJ
             };
 
             const user = {
@@ -127,19 +145,19 @@ export default function FormModal({ handleClose }) {
                 <SafeAreaView>
                     <Controller
                         control={control}
-                        name='imageSelf'
-                        render={({ field: { onChange, value } }) => (
+                        name='images'
+                        render={({ field: { onChange } }) => (
                             <TouchableOpacity
                                 style={[
                                     styles.btnUploadImage, {
-                                        borderColor: errors.imageSelf ? '#ff375b' : '#FFF',
-                                        backgroundColor: errors.imageSelf ? 'rgba(248,162,177,.20)' : 'rgba(255,255,255,0.20)'
+                                        borderColor: errors.images ? '#ff375b' : '#FFF',
+                                        backgroundColor: errors.images ? 'rgba(248,162,177,.20)' : 'rgba(255,255,255,0.20)'
                                     }
                                 ]}
                                 onPress={handleImageUpload}
                                 activeOpacity={0.8}
                             >
-                                {imageURL ? (
+                                {(imageURL) ? (
                                     <Image
                                         source={{
                                             uri: imageURL
@@ -153,31 +171,74 @@ export default function FormModal({ handleClose }) {
                                         style={{ alignSelf: 'center' }}
                                         name="image"
                                         size={130}
-                                        color={errors.imageSelf ? '#ff375b' : "#FFF"}
+                                        color={errors.images ? '#ff375b' : "#FFF"}
                                     />
                                 )}
+                                {(changeImagens.length >= 2) && <Text style={{
+                                    position: 'absolute',
+                                    color: '#FFF',
+                                    fontSize: 11,
+                                    zIndex: 1,
+                                    bottom: 7,
+                                    right: 7,
+                                    padding: 2,
+                                    borderRadius: 999,
+                                    borderWidth: 1,
+                                    borderStyle: 'solid',
+                                    background: 'rgba(255,255,255,0.20)',
+                                    borderColor: '#F0F0F0',
+                                }}>
+                                    <AntDesign name="plus" size={8} color="white" />
+                                    {changeImagens.length-1}
+                                </Text>}
                                 <View>
                                     <input
                                         type="file"
                                         style={styles.fileInput}
                                         ref={fileInputRef}
+                                        multiple
                                         onChange={(e) => {
-                                            const fileObject = e.target.files[0];
-                                            if (!fileObject.type.startsWith("image/")) {
-                                                setValidationError("Por favor, selecione um arquivo de imagem.");
-                                                return;
-                                            }
+                                            const fileObjects = Array.from(e.target.files);
 
-                                            const imageURL = URL.createObjectURL(fileObject);
+                                            fileObjects.forEach((image) => {
+                                                if (!image.type.startsWith("image/")) {
+                                                    setValidationError("Por favor, selecione somente arquivos de imagem.");
+                                                    return;
+                                                }
+                                            })
 
+                                            const imageURL = URL.createObjectURL(fileObjects[0]);
                                             setImageURL(imageURL);
-                                            onChange(fileObject);
+                                            onChange(fileObjects);
                                         }}
                                     />
                                 </View>
                             </TouchableOpacity>
                         )}
                     />
+
+                    <Controller
+                        control={control}
+                        name='nameAgente'
+                        render={({ field: { onChange, value } }) => (
+                            <TextInput
+                                style={[
+                                    styles.input, {
+                                        borderWidth: errors.nameAgente && 1,
+                                        borderColor: errors.nameAgente && '#FF375B'
+                                    }
+                                ]}
+                                placeholderTextColor="rgba(238, 238, 238, 0.5)"
+                                placeholder="Nome do(a) agente"
+                                autoCapitalize="words"
+                                keyboardType="default"
+                                textContentType="name"
+                                value={value}
+                                onChangeText={onChange}
+                            />
+                        )}
+                    />
+                    {errors.nameAgente && <Text style={styles.labelError}>{`* ${errors.nameAgente?.message}`}</Text>}
 
                     <Controller
                         control={control}
@@ -270,6 +331,27 @@ export default function FormModal({ handleClose }) {
                         )}
                     />
                     {errors.companyCity && <Text style={styles.labelError}>{`* ${errors.companyCity?.message}`}</Text>}
+
+                    <Controller
+                        control={control}
+                        name='companyCNPJ'
+                        render={({ field: { onChange, value } }) => (
+                            <TextInputMask
+                                style={[
+                                    styles.input, {
+                                        borderWidth: errors.companyCNPJ && 1,
+                                        borderColor: errors.companyCNPJ && '#FF375B'
+                                    }
+                                ]}
+                                placeholderTextColor="rgba(238, 238, 238, 0.5)"
+                                placeholder="CNPJ (ex: xx.xxx.xxx/0001-xx)"
+                                type={'cnpj'}
+                                value={value}
+                                onChangeText={onChange}
+                            />
+                        )}
+                    />
+                    {errors.companyCNPJ && <Text style={styles.labelError}>{`* ${errors.companyCNPJ?.message}`}</Text>}
                 </SafeAreaView>
             </View>
         </View>
@@ -295,6 +377,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#000'
     },
     btnUploadImage: {
+        position: 'relative',
         backgroundColor: 'rgba(255,255,255,0.20)',
         borderWidth: 1,
         borderColor: '#FFF',

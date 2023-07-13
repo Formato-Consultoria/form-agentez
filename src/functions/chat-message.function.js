@@ -1,7 +1,7 @@
 import { ChatMessageBox } from '../models/ChatMessage';
 
 import { ref, set, get, child } from 'firebase/database';
-import { realtimeDatabase } from '../../config/firebase';
+import { realtimeDatabase, firestoreDatabase } from '../../config/firebase';
 
 import moment from 'moment';
 
@@ -19,6 +19,23 @@ export async function saveMessageInRealtimeDatabase(
     } catch (error) {
         alert("Error no envio da mensagem!");
     }
+}
+
+export async function fetchAllLastSentMessages() {
+    try {
+        
+    } catch (error) {
+        alert("Erro ao carregar os dados das mensagens")
+        console.error("Erro ao carregar os dados das mensagens: ", error);
+    }
+}
+
+export async function migrateMessageInDatabaseFirestore(
+    BoxMessages = [new ChatMessageBox()]
+) {
+    BoxMessages.map((messageData) => {
+        console.log(`${messageData}\n\n`);
+    })
 }
 
 // Faz o upload da imagem no Storage do Firebase

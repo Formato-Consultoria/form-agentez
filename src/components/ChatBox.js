@@ -1,17 +1,49 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import moment from 'moment';
 
 import { ChatMessageBox } from '../models/ChatMessage';
+import { AntDesign } from '@expo/vector-icons';
+import { useState } from "react";
 
 export default function ChatBox({ id, user, content, sent } = new ChatMessageBox()) {
+    const [indexImg, setIndexImg] = useState(0);
+
+    function toggleImg() {
+        const imgs = content?.images;
+        if(indexImg === (imgs.length-1)) {
+            setIndexImg(0)
+            return
+        }
+
+        setIndexImg(indexImg + 1);
+    }
 
     return (
         <View style={styles.container}>
             <Text style={styles.name}>{user?.userName}</Text>
-            <Image
-                source={{ uri: content?.imageSelf }}
-                style={styles.image}
-            />
+            <TouchableOpacity style={{ position: 'relative', marginBottom: 4 }} onPress={toggleImg}>
+                <Image
+                    source={{ uri: content?.images[indexImg] }}
+                    style={styles.image}
+                />
+                {(content?.images.length >= 2) && <Text style={{
+                    position: 'absolute',
+                    color: '#FFF',
+                    fontSize: 13,
+                    zIndex: 1,
+                    bottom: 7,
+                    right: 7,
+                    padding: 3,
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderStyle: 'solid',
+                    background: 'rgba(255,255,255,0.20)',
+                    borderColor: '#F0F0F0',
+                }}>
+                    <AntDesign name="plus" size={9} color="white" />
+                    {content?.images.length-1}
+                </Text>}
+            </TouchableOpacity>
             <View style={styles.balloonsContainer}>
                 <View style={styles.balloon}>
                     <Text style={styles.balloonText}>{content?.attendantName}</Text>
@@ -25,8 +57,11 @@ export default function ChatBox({ id, user, content, sent } = new ChatMessageBox
                 <View style={styles.balloon}>
                     <Text style={styles.balloonText}>{content?.companyCity}</Text>
                 </View>
+                <View style={styles.balloon}>
+                    <Text style={styles.balloonText}>{content?.companyCNPJ}</Text>
+                </View>
             </View>
-            <Text style={styles.time}>{moment(sent).format('DD/MM/YYY HH:mm:ss')}</Text>
+            <Text style={styles.time}>{moment(sent).format('DD/MM/YYYY HH:mm:ss')}</Text>
         </View>
     );
 }
@@ -54,8 +89,6 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: 200,
-        resizeMode: 'cover',
-        marginBottom: 10,
         borderRadius: 3,
     },
     balloonsContainer: {
